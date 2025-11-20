@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Culebrita Conceptos</title>
+<style>
+    body { background: #1a1a1a; color: #fff; text-align: center; font-family: Arial; }
+    canvas { 
+        background: #000; 
+        display: block; 
+        margin: 20px auto; 
+        border: 4px solid #0f0; 
+        box-shadow: 0 0 20px #0f0; 
+    }
+    #info { margin-top: 10px; font-size: 22px; }
+</style>
+</head>
+<body>
+<h1>🐍 Culebrita – Conceptos Correctos e Incorrectos</h1>
+<p>Come los conceptos correctos (verde). Evita los incorrectos (rojo).</p>
+
+<canvas id="game" width="400" height="400"></canvas>
+<div id="info">Puntaje: <span id="score">0</span></div>
+
+<script>
+// CONFIGURACIÓN
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const box = 20;
+
+let snake = [{ x:10, y:10 }];
+let dx = 1, dy = 0;
+let score = 0;
+
+// CONCEPTOS
+const buenos = ["Resistencia", "Capacitancia", "Impedancia", "Longitud", "WireMap", "Atenuación"];
+const malos  = ["Resistivoide", "Capacitoraje", "Impedanciación", "Largor", "WireMop", "Atencion Loss"];
+
+// Generar coordenadas aleatorias
+function randomFood() {
+    return {
+        x: Math.floor(Math.random() * (canvas.width/box)),
+        y: Math.floor(Math.random() * (canvas.height/box))
+    };
+}
+
+let foodBuena = randomFood();
+let foodMala = randomFood();
+
+function drawFood() {
+    // buena
+    ctx.fillStyle = "lime";
+    ctx.fillRect(foodBuena.x * box, foodBuena.y * box, box, box);
+
+    // mala
+    ctx.fillStyle = "red";
+    ctx.fillRect(foodMala.x * box, foodMala.y * box, box, box);
+}
+
+function drawSnake() {
+    ctx.fillStyle = "#0f0";
+    for (let part of snake) {
+        ctx.fillRect(part.x * box, part.y * box, box, box);
+    }
+}
+
+function moveSnake() {
+    const head = {
+        x: snake[0].x + dx,
+        y: snake[0].y + dy
+    };
+
+    // Golpe con paredes
+    if (head.x < 0 || head.y < 0 || head.x >= canvas.width/box || head.y >= canvas.height/box) {
+        alert("¡Game Over! Te saliste del campo.");
+        document.location.reload();
+    }
+
+    snake.unshift(head);
+
+    // Buena comida
+    if (head.x === foodBuena.x && head.y === foodBuena.y) {
+        score++;
+        document.getElementById("score").textContent = score;
+        foodBuena = randomFood();
+    }
+    // Mala comida
+    else if (head.x === foodMala.x && head.y === foodMala.y) {
+        alert("Comiste un concepto incorrecto. ¡Game Over!");
+        document.location.reload();
+    }
+    else {
+        snake.pop();
+    }
+}
+
+// Movimiento
+document.addEventListener("keydown", e => {
+    if (e.key === "ArrowUp"    && dy === 0) { dx = 0; dy = -1; }
+    if (e.key === "ArrowDown"  && dy === 0) { dx = 0; dy = 1; }
+    if (e.key === "ArrowLeft"  && dx === 0) { dx = -1; dy = 0; }
+    if (e.key === "ArrowRight" && dx === 0) { dx = 1; dy = 0; }
+});
+
+// Bucle del juego
+function gameLoop() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    drawFood();
+    drawSnake();
+    moveSnake();
+}
+
+setInterval(gameLoop, 150);
+</script>
+</body>
+</html>
